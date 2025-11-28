@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 ULauncher Extension - Terminal Command Executor (Versão Simplificada)
 """

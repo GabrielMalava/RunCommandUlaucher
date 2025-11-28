@@ -1,13 +1,8 @@
-#!/bin/bash
-# Script wrapper para executar comandos no terminal via ULauncher
-# Executa em background e retorna imediatamente
 
 COMMAND="$1"
 SHELL_TYPE="${2:-fish}"
 
-# Desacopla completamente do processo pai usando nohup e setsid
 if [ "$SHELL_TYPE" = "fish" ]; then
-    # Usa --login para carregar funções do fish
     if command -v gnome-terminal >/dev/null 2>&1; then
         nohup gnome-terminal -- fish --login -c "$COMMAND; exec fish" >/dev/null 2>&1 &
     elif command -v xterm >/dev/null 2>&1; then
@@ -26,6 +21,5 @@ else
     fi
 fi
 
-# Retorna imediatamente
 exit 0
 

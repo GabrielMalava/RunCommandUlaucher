@@ -68,7 +68,6 @@ class KeywordQueryEventListener(EventListener):
             
             if needs_terminal:
                 if use_fish:
-                    # Escapa aspas duplas
                     escaped_query = query.replace('"', '\\"')
                     cmd_str = f'gnome-terminal -- fish --login -c "{escaped_query}; exec fish"'
                 else:
@@ -115,18 +114,15 @@ class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
         action = event.get_action()
         
-        # Executa diretamente via subprocess quando RunScriptAction é acionado
         if isinstance(action, RunScriptAction):
             try:
                 cmd = action.script
-                # Executa o comando diretamente em background
                 subprocess.Popen(cmd, shell=True, start_new_session=True, 
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                               stdin=subprocess.DEVNULL)
             except Exception as e:
                 pass
         
-        # Retorna HideWindowAction imediatamente para não travar
         return HideWindowAction()
 
 
