@@ -1,4 +1,3 @@
-#!/bin/bash
 
 echo "Diagnóstico da Extensão ULauncher"
 echo "======================================"
