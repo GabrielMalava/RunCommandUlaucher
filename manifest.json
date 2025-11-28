@@ -1,0 +1,34 @@
+{
+  "required_api_version": "^2.0",
+  "name": "Terminal Command Executor",
+  "description": "Execute comandos do terminal diretamente do ULauncher sem abrir uma janela de terminal",
+  "developer_name": "malava-dev",
+  "icon": "images/icon.png",
+  "options": {
+    "query_debounce": 0.1
+  },
+  "preferences": [
+    {
+      "id": "keyword",
+      "type": "keyword",
+      "name": "Palavra-chave",
+      "description": "Palavra-chave para ativar a extensão (ex: ! ou cmd)",
+      "default_value": "!"
+    },
+    {
+      "id": "require_confirm",
+      "type": "checkbox",
+      "name": "Exigir confirmação",
+      "description": "Exigir confirmação antes de executar comandos perigosos (sudo, rm, etc)",
+      "default_value": true
+    },
+    {
+      "id": "show_output",
+      "type": "checkbox",
+      "name": "Mostrar saída",
+      "description": "Mostrar notificação com a saída do comando",
+      "default_value": false
+    }
+  ]
+}
+
