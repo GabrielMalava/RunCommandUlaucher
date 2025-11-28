@@ -68,30 +68,32 @@ class KeywordQueryEventListener(EventListener):
             
             if needs_terminal:
                 if use_fish:
-                    cmd_to_run = ['gnome-terminal', '--', 'fish', '--login', '-c', f'{query}; exec fish']
+                    # Escapa aspas duplas
+                    escaped_query = query.replace('"', '\\"')
+                    cmd_str = f'gnome-terminal -- fish --login -c "{escaped_query}; exec fish"'
                 else:
                     expanded_path = os.environ.get('PATH', '') + ':' + os.path.expanduser('~/.local/bin') + ':' + os.path.expanduser('~/bin')
-                    cmd_to_run = ['gnome-terminal', '--', 'bash', '-c', 
-                                 f'export PATH={expanded_path}; {query}; read -p "Pressione Enter para fechar..."']
+                    escaped_query = query.replace('"', '\\"')
+                    cmd_str = f'gnome-terminal -- bash -c "export PATH={expanded_path}; {escaped_query}; read -p \\"Pressione Enter para fechar...\\""'
                 
                 items.append(ExtensionResultItem(
                     icon='images/icon.png',
                     name=f'Executar: {query}',
                     description='Abrirá em terminal para interação' + (' - Comando perigoso!' if is_dangerous else ''),
-                    on_enter=RunScriptAction(' '.join(shlex.quote(str(arg)) for arg in cmd_to_run))
+                    on_enter=RunScriptAction(cmd_str)
                 ))
             else:
                 expanded_path = '$HOME/.local/bin:$HOME/bin:$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
                 if use_fish:
-                    bash_cmd = f'fish --login -c {shlex.quote(query)} &'
+                    cmd_str = f'fish --login -c {shlex.quote(query)} &'
                 else:
-                    bash_cmd = f'bash -c "export PATH={expanded_path}; {shlex.quote(query)} &"'
+                    cmd_str = f'bash -c "export PATH={expanded_path}; {shlex.quote(query)} &"'
                 
                 items.append(ExtensionResultItem(
                     icon='images/icon.png',
                     name=f'Executar: {query}',
                     description='Pressione Enter para executar' + (' - Comando perigoso!' if is_dangerous else ''),
-                    on_enter=RunScriptAction(bash_cmd)
+                    on_enter=RunScriptAction(cmd_str)
                 ))
                 
                 if show_output:
@@ -113,15 +115,18 @@ class ItemEnterEventListener(EventListener):
     def on_event(self, event, extension):
         action = event.get_action()
         
+        # Executa diretamente via subprocess quando RunScriptAction é acionado
         if isinstance(action, RunScriptAction):
             try:
                 cmd = action.script
+                # Executa o comando diretamente em background
                 subprocess.Popen(cmd, shell=True, start_new_session=True, 
                               stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
                               stdin=subprocess.DEVNULL)
             except Exception as e:
                 pass
         
+        # Retorna HideWindowAction imediatamente para não travar
         return HideWindowAction()
 
 
