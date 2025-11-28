@@ -33,8 +33,6 @@ class KeywordQueryEventListener(EventListener):
                 on_enter=HideWindowAction()
             ))
         else:
-            # Versão simples - executa o comando diretamente
-            # RunScriptAction aceita apenas o comando como string
             items.append(ExtensionResultItem(
                 icon='images/icon.png',
                 name=f'Executar: {query}',

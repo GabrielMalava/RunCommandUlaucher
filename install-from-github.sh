@@ -38,7 +38,7 @@ echo "Clonando repositório do GitHub..."
 cd "$TEMP_DIR"
 git clone "$GITHUB_URL" extension-temp
 
-echo "📋 Copiando arquivos da extensão..."
+echo "Copiando arquivos da extensão..."
 mkdir -p "$TARGET_DIR"
 cp -r extension-temp/* "$TARGET_DIR"/
 
