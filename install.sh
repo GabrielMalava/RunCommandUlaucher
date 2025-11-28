@@ -1,20 +1,16 @@
-#!/bin/bash
 
-# Script de instalação para a extensão Terminal Command Executor do ULauncher
-
-set -e
 
 EXTENSION_NAME="com.github.malava-dev.terminal-command"
-ULAUNCHER_EXT_DIR="$HOME/.config/ulauncher/extensions"
+# O ULauncher instala extensões em ~/.local/share/ulauncher/extensions/
+ULAUNCHER_EXT_DIR="$HOME/.local/share/ulauncher/extensions"
 PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET_DIR="$ULAUNCHER_EXT_DIR/$EXTENSION_NAME"
 
-echo "🚀 Instalando Terminal Command Executor para ULauncher..."
+echo "Instalando Terminal Command Executor para ULauncher..."
 echo ""
 
-# Verifica se o ULauncher está instalado
 if ! command -v ulauncher &> /dev/null; then
-    echo "❌ Erro: ULauncher não está instalado!"
+    echo "Erro: ULauncher não está instalado!"
     echo "   Instale o ULauncher primeiro:"
     echo "   sudo add-apt-repository ppa:agornostal/ulauncher"
     echo "   sudo apt update"
@@ -22,32 +18,44 @@ if ! command -v ulauncher &> /dev/null; then
     exit 1
 fi
 
-# Cria o diretório de extensões se não existir
 mkdir -p "$ULAUNCHER_EXT_DIR"
 
-# Remove instalação anterior se existir
 if [ -d "$TARGET_DIR" ]; then
-    echo "📦 Removendo instalação anterior..."
+    echo "Removendo instalação anterior..."
     rm -rf "$TARGET_DIR"
 fi
 
-# Copia os arquivos da extensão
-echo "📋 Copiando arquivos da extensão..."
+echo "Copiando arquivos da extensão..."
 cp -r "$PROJECT_DIR" "$TARGET_DIR"
 
-# Remove arquivos desnecessários
 cd "$TARGET_DIR"
 rm -f install.sh README.md .git -rf 2>/dev/null || true
 
-# Instala dependências Python
-echo "📥 Instalando dependências Python..."
-if command -v pip3 &> /dev/null; then
-    pip3 install -r requirements.txt --user
-elif command -v pip &> /dev/null; then
-    pip install -r requirements.txt --user
+echo " Verificando dependências Python..."
+if python3 -c "import ulauncher" 2>/dev/null; then
+    echo "Módulo ulauncher já está disponível (instalado com o ULauncher)"
 else
-    echo "⚠️  Aviso: pip não encontrado. Instale as dependências manualmente:"
-    echo "   pip3 install -r $TARGET_DIR/requirements.txt"
+    echo "Módulo ulauncher não encontrado. Tentando instalar..."
+    if command -v pip3 &> /dev/null; then
+        if pip3 install -r requirements.txt --user 2>/dev/null; then
+            echo "Dependências instaladas com sucesso (--user)"
+        else
+            echo "Tentando com --break-system-packages (pode ser necessário no Python 3.12+)..."
+            if pip3 install -r requirements.txt --user --break-system-packages 2>/dev/null; then
+                echo "Dependências instaladas com sucesso"
+            else
+                echo "Não foi possível instalar via pip3."
+                echo "Tente instalar manualmente:"
+                echo "   pip3 install --user --break-system-packages ulauncher"
+                echo "   ou"
+                echo "   sudo apt install python3-ulauncher"
+                echo ""
+                echo "Continuando mesmo assim - a extensão pode funcionar se o ULauncher já tiver as dependências"
+            fi
+        fi
+    else
+        echo "pip3 não encontrado. O ULauncher geralmente já inclui as dependências necessárias."
+    fi
 fi
 
 # Verifica se o ícone existe, se não, cria um placeholder

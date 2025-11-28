@@ -13,22 +13,9 @@
       "type": "keyword",
       "name": "Palavra-chave",
       "description": "Palavra-chave para ativar a extensão (ex: ! ou cmd)",
-      "default_value": "!"
-    },
-    {
-      "id": "require_confirm",
-      "type": "checkbox",
-      "name": "Exigir confirmação",
-      "description": "Exigir confirmação antes de executar comandos perigosos (sudo, rm, etc)",
-      "default_value": true
-    },
-    {
-      "id": "show_output",
-      "type": "checkbox",
-      "name": "Mostrar saída",
-      "description": "Mostrar notificação com a saída do comando",
-      "default_value": false
+      "default_value": "cmd"
     }
   ]
 }
+
 

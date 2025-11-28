@@ -11,17 +11,39 @@ Extensão para o ULauncher que permite executar comandos do terminal diretamente
 
 ## 📦 Instalação
 
-### Método 1: Instalação Manual
+### Método 1: Instalação Direta do GitHub (Recomendado)
+
+Se você já clonou o repositório localmente, execute:
+
+```bash
+cd /home/malava-dev/Documents/git/UlaucherProjectTerminal
+./install.sh
+```
+
+Ou se quiser instalar diretamente do GitHub sem clonar primeiro:
+
+```bash
+# Clone o repositório
+git clone https://github.com/GabrielMalava/RunCommandUlaucher.git
+cd RunCommandUlaucher
+
+# Execute o script de instalação
+chmod +x install.sh
+./install.sh
+```
+
+### Método 2: Instalação Manual
 
 1. Clone ou copie este diretório para a pasta de extensões do ULauncher:
 ```bash
-cp -r UlaucherProjectTerminal ~/.config/ulauncher/extensions/com.github.malava-dev.terminal-command
+git clone https://github.com/GabrielMalava/RunCommandUlaucher.git
+cp -r RunCommandUlaucher ~/.local/share/ulauncher/extensions/com.github.malava-dev.terminal-command
 ```
 
 2. Instale as dependências:
 ```bash
-cd ~/.config/ulauncher/extensions/com.github.malava-dev.terminal-command
-pip3 install -r requirements.txt
+cd ~/.local/share/ulauncher/extensions/com.github.malava-dev.terminal-command
+pip3 install -r requirements.txt --user
 ```
 
 3. Reinicie o ULauncher:
@@ -29,13 +51,18 @@ pip3 install -r requirements.txt
 ulauncher --restart
 ```
 
-### Método 2: Usando o Script de Instalação
+### Método 3: Via Interface do ULauncher (Pode não funcionar)
 
-Execute o script de instalação:
-```bash
-chmod +x install.sh
-./install.sh
-```
+Alguns usuários relatam problemas ao instalar diretamente via URL do GitHub na interface do ULauncher. Se quiser tentar:
+
+1. Abra o ULauncher (Alt+Space)
+2. Pressione `Ctrl+P` para abrir Preferências
+3. Vá até a aba "Extensões"
+4. Clique em "Adicionar extensão"
+5. Cole a URL: `https://github.com/GabrielMalava/RunCommandUlaucher.git`
+6. Se não funcionar, use um dos métodos acima
+
+**Nota:** O método mais confiável é usar o script `install.sh` após clonar o repositório.
 
 ## ⚙️ Configuração
 
