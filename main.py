@@ -6,6 +6,7 @@ Executa comandos do terminal diretamente do ULauncher
 
 import subprocess
 import shlex
+import os
 from ulauncher.api.client.Extension import Extension
 from ulauncher.api.client.EventListener import EventListener
 from ulauncher.api.shared.event import KeywordQueryEvent, ItemEnterEvent
@@ -53,42 +54,45 @@ class KeywordQueryEventListener(EventListener):
             needs_terminal = any(query.strip().startswith(cmd + ' ') or query.strip() == cmd 
                                 for cmd in interactive_commands)
             
-            if is_dangerous and require_confirm:
-                if needs_terminal:
-                    escaped_query = query.replace('"', '\\"')
-                    terminal_cmd = f'gnome-terminal -- bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\"" || xterm -e bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\"" || x-terminal-emulator -e bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\""'
-                    items.append(ExtensionResultItem(
-                        icon='images/icon.png',
-                        name=f'Executar: {query}',
-                        description='Comando perigoso - Abrirá em terminal para interação',
-                        on_enter=RunScriptAction(terminal_cmd)
-                    ))
+            # Verifica se o comando existe no PATH do bash
+            cmd_name = query.split()[0]
+            cmd_exists_in_bash = False
+            try:
+                result = subprocess.run(['bash', '-c', f'command -v {shlex.quote(cmd_name)}'], 
+                                       capture_output=True, timeout=1)
+                cmd_exists_in_bash = result.returncode == 0
+            except:
+                pass
+            
+            use_fish = not cmd_exists_in_bash
+            
+            if needs_terminal:
+                if use_fish:
+                    cmd_to_run = ['gnome-terminal', '--', 'fish', '--login', '-c', f'{query}; exec fish']
                 else:
-                    bash_cmd = f'bash -c "export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {shlex.quote(query)}"'
-                    items.append(ExtensionResultItem(
-                        icon='images/icon.png',
-                        name=f'Executar: {query}',
-                        description='Comando perigoso - Pressione Enter para confirmar',
-                        on_enter=RunScriptAction(bash_cmd)
-                    ))
+                    expanded_path = os.environ.get('PATH', '') + ':' + os.path.expanduser('~/.local/bin') + ':' + os.path.expanduser('~/bin')
+                    cmd_to_run = ['gnome-terminal', '--', 'bash', '-c', 
+                                 f'export PATH={expanded_path}; {query}; read -p "Pressione Enter para fechar..."']
+                
+                items.append(ExtensionResultItem(
+                    icon='images/icon.png',
+                    name=f'Executar: {query}',
+                    description='Abrirá em terminal para interação' + (' - Comando perigoso!' if is_dangerous else ''),
+                    on_enter=RunScriptAction(' '.join(shlex.quote(str(arg)) for arg in cmd_to_run))
+                ))
             else:
-                if needs_terminal:
-                    escaped_query = query.replace('"', '\\"')
-                    terminal_cmd = f'gnome-terminal -- bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\"" || xterm -e bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\"" || x-terminal-emulator -e bash -c "export PATH=\\$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {escaped_query}; read -p \\"Pressione Enter para fechar...\\""'
-                    items.append(ExtensionResultItem(
-                        icon='images/icon.png',
-                        name=f'Executar: {query}',
-                        description='Abrirá em terminal para interação',
-                        on_enter=RunScriptAction(terminal_cmd)
-                    ))
+                expanded_path = '$HOME/.local/bin:$HOME/bin:$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
+                if use_fish:
+                    bash_cmd = f'fish --login -c {shlex.quote(query)} &'
                 else:
-                    bash_cmd = f'bash -c "export PATH=$PATH:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin; {shlex.quote(query)}"'
-                    items.append(ExtensionResultItem(
-                        icon='images/icon.png',
-                        name=f'Executar: {query}',
-                        description='Pressione Enter para executar',
-                        on_enter=RunScriptAction(bash_cmd)
-                    ))
+                    bash_cmd = f'bash -c "export PATH={expanded_path}; {shlex.quote(query)} &"'
+                
+                items.append(ExtensionResultItem(
+                    icon='images/icon.png',
+                    name=f'Executar: {query}',
+                    description='Pressione Enter para executar' + (' - Comando perigoso!' if is_dangerous else ''),
+                    on_enter=RunScriptAction(bash_cmd)
+                ))
                 
                 if show_output:
                     items.append(ExtensionResultItem(
@@ -104,12 +108,22 @@ class KeywordQueryEventListener(EventListener):
 
 
 class ItemEnterEventListener(EventListener):
-    """Ouvinte para eventos de entrada de item"""
+    """Ouvinte para eventos de entrada de item - executa comandos diretamente"""
 
     def on_event(self, event, extension):
+        action = event.get_action()
+        
+        if isinstance(action, RunScriptAction):
+            try:
+                cmd = action.script
+                subprocess.Popen(cmd, shell=True, start_new_session=True, 
+                              stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+                              stdin=subprocess.DEVNULL)
+            except Exception as e:
+                pass
+        
         return HideWindowAction()
 
 
 if __name__ == '__main__':
     TerminalCommandExtension().run()
-
