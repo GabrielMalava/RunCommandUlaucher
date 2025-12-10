@@ -85,7 +85,7 @@ class KeywordQueryEventListener(EventListener):
         ))
 
         home_dir = os.path.expanduser("~")
-        terminal_script = f"gnome-terminal -- bash --login -c 'cd \"{home_dir}\"; {escaped_cmd}; echo; echo Pressione ENTER para fechar...; read'"
+        terminal_script = f"gnome-terminal --working-directory=\"{home_dir}\" -- bash --login -c '{escaped_cmd}; echo; echo Pressione ENTER para fechar...; read'"
         
         items.append(ExtensionResultItem(
             icon='images/icon.png',
