@@ -3,7 +3,7 @@
   "name": "Terminal Command Executor",
   "description": "Execute comandos do terminal diretamente do ULauncher sem abrir uma janela de terminal",
   "developer_name": "malava-dev",
-  "icon": "images/icon.png",
+  "icon": "images/icon.svg",
   "options": {
     "query_debounce": 0.1
   },
@@ -13,7 +13,7 @@
       "type": "keyword",
       "name": "Palavra-chave",
       "description": "Palavra-chave para ativar a extensão (ex: ! ou cmd)",
-      "default_value": "cmd"
+      "default_value": "!"
     }
   ]
 }
